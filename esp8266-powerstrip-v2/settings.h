@@ -1,5 +1,5 @@
 /* You should get Auth Token in the Blynk app */
-char auth[] = "bIuXGGq6sw7dsy9n4Iu-Tlf0HhJEeJiP";
+char auth[] = "bIuXGGq6sw7dsy9n4Iu-Tlf0HhJEUIIO";
 
 /**************************************************
                SN74HC595 Connections
