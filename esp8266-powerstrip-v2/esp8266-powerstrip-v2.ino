@@ -4,7 +4,10 @@
 #include "settings.h"
 #include "wifimanagment.h"
 #include "shiftwrite.h"
+#include <OneWire.h>
+#include <DallasTemperature.h>
 #include <BlynkSimpleEsp8266.h>
+#include "temperature.h"
 
 BlynkTimer timer;
 
@@ -16,7 +19,7 @@ int btnState[] = { 1, 1, 1, 1, 1, 1 };
 // Every time we connect to the cloud...
 BLYNK_CONNECTED() {
   // Request the latest state from the server
-  Blynk.syncVirtual(0,1,2,3,4,5);
+  Blynk.syncVirtual(0,1,2,3,4,5,6);
 
   // Alternatively, you could override server state using:
   //Blynk.virtualWrite(V2, relayState1);
@@ -30,7 +33,7 @@ BLYNK_WRITE_DEFAULT() {
 }
 
 void checkPhysicalButton() {
-  for (int i = 0; i <= 5; i++) {
+  for (int i = 0; i < TOTAL_RELAYS; i++) {
     if (digitalRead(BTN_PIN[i]) == 0) {
       // btnState[] is used to avoid sequential toggles
       if (btnState[i] != 0) {
@@ -39,10 +42,13 @@ void checkPhysicalButton() {
         shiftWrite(i, relayState[i]);
         // Update Button Widget
         Blynk.virtualWrite(i, relayState[i]);
+        digitalWrite(i, btnState[i]);
       }
       btnState[i] = 0;
+      digitalWrite(BTN_PIN[i], btnState[i]);
     } else {
       btnState[i] = 1;
+      digitalWrite(BTN_PIN[i], btnState[i]);
     }
   }
 }
@@ -52,12 +58,13 @@ void setup() {
   Serial.begin(115200);
   delay(100);
 
-  // Set the three SPI pins to be outputs
+  // Set the SPI pins to be outputs
   pinMode(DATA_PIN, OUTPUT);
   pinMode(LATCH_PIN, OUTPUT);
   pinMode(CLOCK_PIN, OUTPUT);
+  pinMode(THERMO_PIN, OUTPUT);
 
-  for (int i = 0; i <= 5; i++) {
+  for (int i = 0; i < TOTAL_RELAYS; i++) {
     // Turn off all RELAYS
     shiftWrite(i, HIGH);
     // Restore previous RELAYS states
@@ -65,11 +72,12 @@ void setup() {
     shiftWrite(i, relayState[i]);
   }
 
-  // Setup a function to be called every 100 ms
-  timer.setInterval(100L, checkPhysicalButton);
-
   if(connectWifi()){
     Blynk.begin(auth, ssid, password);
+    sensors.begin();
+    // Setup function to be called every time
+    timer.setInterval(100L, checkPhysicalButton);
+    timer.setInterval(3000L, sendTemps);
   } else {
     startAP();
     Blynk.begin(auth, ssid, password);
