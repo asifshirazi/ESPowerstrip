@@ -1,7 +1,7 @@
 /* You should get Auth Token in the Blynk app */
-char auth[] = "bIuXGGq6sw7dsy9n4Iu-Tlf0HhJEUIIO";
+char blynk_token[34] = "AUTH_TOKEN";
 
-#define TOTAL_RELAYS 6
+const int TOTAL_RELAYS = 6;
 
 /**************************************************
                SN74HC595 Connections
@@ -22,6 +22,7 @@ const int DATA_PIN = 15;   // D8 - Connected to DS
 // D3, D4, D5, D6, D7, RX
 // V0, V1, V2, V3, V4, V5
 // LG, CO, HE, CH, WF, RG
+String BTN_DEVICE[] = { "Light", "CO2", "Heater", "Chiller", "Waterfall", "RGB Light" };
 int BTN_PIN[] = {0, 2, 14, 12, 13, 3};
 
 const int THERMO_PIN = 4; // D2
